@@ -2,12 +2,6 @@
 
 ⎕IO←0 ⍝ index from 0
 
-val ← { (10>⍵) ∧ (0≤⍵) } 
-filto ← { (val ⍵) / ⍵ }
-filt ← { ((10>⍵) ∧ (0≤⍵)) / ⍵ }
-deco ← { 10 ⊥ filt (⍵-48) }
-getnum ← { deco (⎕FIO[8] ⍵) } ⍝ fgets
-
 ∇ result ← eof file
   result ← ⎕FIO[10] file ⍝ feof
 ∇  
@@ -23,16 +17,6 @@ getnum ← { deco (⎕FIO[8] ⍵) } ⍝ fgets
   →READ
   END:
   null ← ⎕FIO[4] f ⍝ fclose ⍝ don't print fclose's result
-∇
-
-∇result←d sf a
-  result←⍬
-  →(nonempty empty)[a≡⍬]
-  empty: →0
-  nonempty:
-  →(cont end)[a[0]=d]
-  end:→0
-  cont:result←a[0],d sf 1↓a
 ∇
 
 ∇ret←d find a
@@ -66,8 +50,6 @@ getnum ← { deco (⎕FIO[8] ⍵) } ⍝ fgets
 ⍝ split by , (44), drop the last char (\n)
 program ← 44 split ¯1↓readall 'input'
 
-'program: ', program
-
 ∇result←i step vec
  opindex←i × 4
  opcode←vec[opindex]
@@ -97,8 +79,22 @@ loop:
 end:result←vec
 ∇
 
-program[1]←12
-program[2]←2
-(exec program)[0]
+∇result ← vn with program
+  program[1]←vn[0]
+  program[2]←vn[1]
+  result←(exec program)[0]
+∇
+
+'Part 1 answer:', 12 2 with program
+
+target←19690720
+∇result ← nvt part2 program
+result←⍬
+ r←(2↑nvt) with program
+ →(end found)[nvt[2]=r]
+ end:→0
+ found: 'Part 2 answer:', nvt[1] + 100 × nvt[0]
+∇
+suppress←{(100|⍵) (⌊⍵÷100) target part2 program}¨ ⍳10000
 
 )OFF
