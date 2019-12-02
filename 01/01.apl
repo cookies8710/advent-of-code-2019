@@ -1,5 +1,7 @@
 #!/usr/local/bin/apl -s
 
+⎕IO←0 ⍝ index from 0
+
 val ← { (10>⍵) ∧ (0≤⍵) } 
 filto ← { (val ⍵) / ⍵ }
 filt ← { ((10>⍵) ∧ (0≤⍵)) / ⍵ }
@@ -16,7 +18,7 @@ getnum ← { deco (⎕FIO[8] ⍵) } ⍝ fgets
   f ← ⎕FIO[3] filename ⍝ fopen
   READ:
   locanum ← getnum f
-  →(CONT END)[1 + (eof f)]
+  →(CONT END)[eof f]
   CONT: result ← result, locanum
   →READ
   END:
@@ -24,12 +26,12 @@ getnum ← { deco (⎕FIO[8] ⍵) } ⍝ fgets
 ∇
 
 masses ← readall 'input'
-compfuel ← { (⌊ ⍵ ÷ 3) - 2 }
+compfuel ← { 0 ⌈ (⌊ ⍵ ÷ 3) - 2 }
 
 ∇ result ← totalfuel masses;p
-  p ← 0 ⌈ compfuel masses
+  p ← compfuel masses
   nonnull ← (∨/ {⍵≠0} p)
-  →(END CONT)[1 + nonnull]
+  →(END CONT)[nonnull]
   END: 
   result ← p
   → 0
@@ -38,6 +40,6 @@ compfuel ← { (⌊ ⍵ ÷ 3) - 2 }
 ∇
 
 'Part 1 answer:', +/ compfuel masses
-'Part 2 anser:', +/ totalfuel masses
+'Part 2 answer:', +/ totalfuel masses
 
 )OFF
