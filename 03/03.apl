@@ -11,12 +11,11 @@ L←{⍵×(-1 0)}
 U←{⍵×(0 1)}
 D←{⍵×(0 (-1))}
 
-center←100 100
+origin←5 5
+DIM ← 15
 
-DIM ← 10
-
-
-∇result←s1parse str ⍝ str -> vector vector vector ...
+⍝ parses path string to vectors str -> vector vector vector ...
+∇result←s1parse str 
   ⍝ split by ,
   i←¯1,((','⍷str)/⍳⍴str),(⍴str)
   ⍝ extract parts - R1 U2 etc
@@ -25,6 +24,7 @@ DIM ← 10
   result ← ⍎¨ {⍵[0],' ',(1↓⍵)}¨ parts
 ∇
 
+⍝ generates partial matrix for given position an vector
 ⍝ dim pos vec → mat
 ∇result←gen x
  dim←x[0]
@@ -37,17 +37,20 @@ DIM ← 10
  ⊣{result[(⊢/⍵);(⊣/⍵)]←1}¨ allpos  
 ∇
 
+⍝ draws path
 ∇result←draw d 
  v←⊃d[0]
  p←⊃d[1]
  result←1⌊+/ {gen DIM (p[⍵]) (v[⍵])}¨ ⍳⍴v
 ∇
+
+⍝ parses path string and draws it
 ∇result ← complete strs
 vectors←s1parse strs
 result ← draw vectors ((⊂0 0),(+\vectors))
 ∇
 
-
+⍝ draws all (both) wires and find the intersection closest to origin
 ∇result←solve wires
   sum ← ⊃⊃+/ complete¨ wires ⍝ todo why ⊃⊃
   4⎕CRsum
