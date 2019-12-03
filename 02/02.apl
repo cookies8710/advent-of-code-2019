@@ -96,6 +96,6 @@ result←⍬
  found: 'Part 2 answer:', nvt[1] + 100 × nvt[0]
 ∇
 
-suppress←(⍳100)∘.{⍺ ⍵ target part2 program}(⍳100)
+⊣(⍳100)∘.{⍺ ⍵ target part2 program}(⍳100)
 
 )OFF
