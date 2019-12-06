@@ -4,7 +4,10 @@
 DISPLAY ← {4⎕CR⍵}
 GET_LINES ← {⎕FIO[49]⍵}
 
+⍝ global variables 
+input ← 5
 halt ← 0
+
 filename ← {⍵[0;]}⊃¯1↑⎕ARG
 
 'Loading program ', filename
@@ -42,16 +45,46 @@ program ← ⍎raw
 ∇ newip ← INPUT x; ip; i1; o; program; params
   (ip params program) ← x
   i1 ← program[ip+1]
-  'INPUT writing 1 to ', i1
-  program[i1] ← 1 ⍝ INPUT
+  'INPUT writing ', input,' to ', i1
+  program[i1] ← input 
   newip ← (ip + 2) program
 ∇
 
 ∇ newip ← OUTPUT x; ip; i1; i2; o; program; params
   (ip params program) ← x
   'OUTPUT'
-  DISPLAY program[program[ip+1]]
+  DISPLAY GET_PARAMETER program ip 0 params
   newip ← (ip + 2) program
+∇
+
+∇ newip ← JT x; ip; program; params; condition; target
+  (ip params program) ← x
+  (condition target) ← {GET_PARAMETER program ip ⍵ params}¨ 0 1
+  →(SKIP JUMP)[1⌊condition]
+  JUMP:newip ← target program
+  →0
+  SKIP:newip ← (ip + 3) program
+∇
+
+∇ newip ← JF x; ip; program; params; condition; target
+  (ip params program) ← x
+  (condition target) ← {GET_PARAMETER program ip ⍵ params}¨ 0 1
+  →(SKIP JUMP)[~1⌊condition]
+  JUMP:newip ← target program
+  →0
+  SKIP:newip ← (ip + 3) program
+∇
+
+∇ newip ← LT x; ip; program; params; condition; target
+  (ip params program) ← x
+  program[program[ip + 3]] ← </ {GET_PARAMETER program ip ⍵ params}¨ 0 1
+  newip ← (ip + 4) program
+∇
+
+∇ newip ← EQ x; ip; program; params; condition; target
+  (ip params program) ← x
+  program[program[ip + 3]] ← =/ {GET_PARAMETER program ip ⍵ params}¨ 0 1
+  newip ← (ip + 4) program
 ∇
 
 ∇ omit ← HALT p
@@ -61,7 +94,7 @@ program ← ⍎raw
 ∇ newip ← STEP p; ip; program; opcode; fn; operation; params
   (ip program) ← p
   opcode ← ¯2↑'0',⍕program[ip] ⍝ add leading 0 to be sure opcode is at least 2 chars
-  fn ← {⍵[0;]}⊃(('01' '02' '03' '04' '99') ≡¨ ⊂opcode) / 'ADD' 'MUL' 'INPUT' 'OUTPUT' 'HALT' ⍝ translate opcode to function
+  fn ← {⍵[0;]}⊃(('01' '02' '03' '04' '05' '06' '07' '08' '99') ≡¨ ⊂opcode) / 'ADD' 'MUL' 'INPUT' 'OUTPUT' 'JT' 'JF' 'LT' 'EQ' 'HALT' ⍝ translate opcode to function
   params←¯2↓'00',⍕program[ip]
   newip ← ⍎ fn,' ',⍕ip  params  '(' program ')'
 ∇
