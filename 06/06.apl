@@ -158,6 +158,19 @@ process edge_matrix
 
 d edge_matrix
 
+
+⍝ generates identity matrix of side ⍵
+id_matrix ← {⍵ ⍵⍴1,⍵/0}
+
+⍝ initial state - distance matrix with X (infinity) everywhere except main diagonal
+x←X ∧ ~id_matrix nvertices
+d x
+
+d x∧edge_matrix
+⍝x←(~id_matrix nvertices) ∧ edge_matrix ∨ 1000
+ x[0;] ⌊ ({(1000 1)[⍵]}edge_matrix[1;])⌊ ({(1000 1)[⍵]}edge_matrix[3;])
+
+
 'Done.'
 
 )OFF
