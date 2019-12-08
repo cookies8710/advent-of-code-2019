@@ -15,14 +15,15 @@ input ← ⍎¨⊃{⍵[0]}GET_LINES filename
 layers ← (⍴input)÷×/w t
 'The images has' layers 'layers'
 
-∇r←fun args;i;w;t;data;s
+⍝ gets layer number 'i' from 'data', assuming layers are 'w' wide and 't' tall
+∇r←GET_LAYER args;i;w;t;data;s
  (i w t data)←args
  s←w×t
  r ← t w⍴s↑(i×s)↓data
 ∇
 
 ⍝ extract layers from input
-layers ← {fun ⍵ w t input}¨ ⍳layers 
+layers ← {GET_LAYER ⍵ w t input}¨ ⍳layers 
 
 ⍝ for each layer compute number of 0s, 1s, 2s
 zeros ← {+/+/0⍷⍵}¨layers
@@ -30,6 +31,15 @@ ones ← {+/+/1⍷⍵}¨layers
 twos ← {+/+/2⍷⍵}¨layers
  
 'Part 1:', (1↑(⍳⍴zeros)[⍋zeros]) ⌷ ones × twos
+
+∇result ← b COMB a
+  mask ← (0⍷a)∨(1⍷a)
+  result ← (mask∧a)∨((~mask)∧b)
+∇
+
+'Part 2:' 
+⍝ COMB/ works like foldr, so the layers have to be reversed; then for each row translate 0s to ' ' and 1s to '#'
+{' #'[⍵]}¨⊃COMB/⌽layers ⍝ 'HGBCF'
 
 'Done.'
 )OFF
