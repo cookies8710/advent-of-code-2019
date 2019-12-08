@@ -9,7 +9,7 @@ filename ← {⍵[0;]}⊃¯1↑⎕ARG
 
 'Loading input ', filename
 
-input ← ⍎¨⊃{⍵[0]}GET_LINES filename
+input ← ⍎¨⊃0⌷GET_LINES filename
 
 (w t) ← 25 6
 layers ← (⍴input)÷×/w t
@@ -32,9 +32,10 @@ twos ← {+/+/2⍷⍵}¨layers
  
 'Part 1:', (1↑(⍳⍴zeros)[⍋zeros]) ⌷ ones × twos
 
+⍝ combines layers 'a' and 'b'
 ∇result ← b COMB a
-  mask ← (0⍷a)∨(1⍷a)
-  result ← (mask∧a)∨((~mask)∧b)
+  mask ← ~2⍷a
+  result ← (mask∧a)∨((~mask)∧b) ⍝ take from a where ≠ 2 otherwise take from b
 ∇
 
 'Part 2:' 
