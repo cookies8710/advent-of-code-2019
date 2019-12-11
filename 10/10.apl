@@ -14,7 +14,7 @@ input ← ⊃GET_LINES filename
 d ← DISPLAY 
 (h w) ← ⍴input
 
-'Loaded map' h '×' w ':'
+'Loaded map' w '×' h ':'
 d input
 
 ∇ return←gcd args; a; b
@@ -35,7 +35,7 @@ d asteroids
 ∇ return ← valid_coords args; map; x; y; lx; ly
   (map pos) ← args
   (x y) ← ⊃pos
-  (lx ly) ← ⍴map
+  (ly lx) ← ⍴map
 
   return ← 0
   ⍎(∨/ (x<0) (y<0) (x ≥ lx) (y ≥ ly))/'→0'
@@ -76,7 +76,7 @@ d asteroids
 
   tmp ← (⍴map)⍴1
 
-  ⊣{tmp ← tmp ∧ gen_invi map (x y) ⍵}¨((×/⍴map)⍴⍳⍴map)
+  ⊣{tmp ← tmp ∧ gen_invi map (x y) ⍵}¨((×/⍴map)⍴⍳⌽⍴map)
   return ← tmp
 ∇
 
@@ -87,7 +87,9 @@ d asteroids
   return ← ¯1 + +/+/ map ∧ visibility_from map pos
 ∇
 
-part1 ← ⌈/⌈/(⍳h) ∘.{number_of_visible_from asteroids (⍵ ⍺)} ⍳w
+
+visibility_matrix ← (⍳h) ∘.{number_of_visible_from asteroids (⍵ ⍺)} ⍳w
+part1 ← ⌈/⌈/ visibility_matrix
 'Part 1:' part1
 
 'Done.'
