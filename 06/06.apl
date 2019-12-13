@@ -4,53 +4,14 @@
 DISPLAY ← {4⎕CR⍵}
 GET_LINES ← {⎕FIO[49]⍵}
 
+∇dbg a
+ a,':'
+ DISPLAY ⍎a
+∇
+
 filename ← {⍵[0;]}⊃¯1↑⎕ARG
 
 'Loading input from ', filename
-
-⍝tree ← ('A' ('B' ('D' ⍬ ⍬) ('E' ⍬ ⍬)) ('C' ⍬ ⍬) ('G' ⍬ ⍬))
-
-⍝'tree:'
-⍝DISPLAY tree
-⍝
-⍝∇ print t
-⍝  →(C E)[t≡⍬]
-⍝  C:t[0]
-⍝  print¨ 1↓t
-⍝  E:→0
-⍝∇
-⍝
-⍝halt ← 2
-⍝∇ result ← add x; tree; node; newnode
-⍝  (tree node newnode) ← x
-⍝'ADD 1. tree: ' 
-⍝4⎕CR tree
-⍝'ADD 2. adding ',newnode,' under node ',node
-⍝
-⍝4⎕CR ⊃tree[0]
-⍝4⎕CR node
-⍝'ADD 2.5 is this node correct?', tree[0] ≡ node
-⍝
-⍝  tree ←  tree, (⊂newnode)
-⍝
-⍝'ADD 3. added; tree: ' 
-⍝4⎕CR tree
-⍝
-⍝'ADD 4. ⊃tree[0]:'
-⍝4⎕CR ⊃tree[0]
-⍝'ADD 5. children:' 
-⍝4⎕CR1↓tree
-⍝
-⍝halt←halt-1
-⍝  →(0 C)[1⌊halt]
-⍝C:
-⍝  tree ← tree[0], {add (⊂⍵) node newnode}¨(1↓tree) 
-⍝  result ← tree
-⍝∇
-⍝
-⍝print tree
-
-⍝DISPLAY add  ('A1' (,'A2') ) 'A1' 'B1'
 
 ∇ result ← GRAPH args
   n ← {⍵[0]}⍴args
@@ -107,11 +68,7 @@ edges ← 4 4 ⍴ 0 1 1 0 1 0 0 0 1 0 0 1 0 0 1 0
   ret ← mat
 ∇
 
-'DEVE'
-d edges
-d process edges
-
-lines ← GET_LINES 'input-test'
+lines ← GET_LINES filename
 split←{{⍵[0]}(')'⍷⍵)/⍳⍴⍵}
 
 
@@ -126,23 +83,22 @@ sorted←cat[⍋cat]
 vertices ← ∪ cat
 nvertices ← 0⌷⍴vertices
 
-d vertices
 edge_matrix ← nvertices nvertices ⍴ 0
 
 ∇ return ← vertex_index args
-  return ← ((args⍷⊃vertices)[;0])/⍳⍴vertices
+  return ← ¯1↑((args⍷⊃vertices)[;0])/⍳⍴vertices
 ∇
 
-∇ return ← create_matrix args
+∇ return ← create_matrix args; input_edges
+  input_edges ← args
   i ← 0
-
 
 L:
   (a b) ← (⊃0⌷⊃input_edges[i]) (⊃1⌷⊃input_edges[i])
   a ← {⍵[0]}vertex_index (,a)
   b ← {⍵[0]}vertex_index (,b)
 
-  edge_matrix[a;b] ← 1
+ ⍝ edge_matrix[a;b] ← 1
   edge_matrix[b;a] ← 1
 
   i ← i+1
@@ -152,24 +108,44 @@ L:
 
 ∇
 
+'Creating edge matrix for' nvertices 'vertices'
 edge_matrix ← create_matrix input_edges
-
-process edge_matrix
-
+'Edge matrix created'
 d edge_matrix
-
 
 ⍝ generates identity matrix of side ⍵
 id_matrix ← {⍵ ⍵⍴1,⍵/0}
 
 ⍝ initial state - distance matrix with X (infinity) everywhere except main diagonal
-x←X ∧ ~id_matrix nvertices
-d x
+proximity_matrix←X ∧ ~id_matrix nvertices
+proximity_matrix←proximity_matrix∨edge_matrix ⍝ initial edges - direct neighbours
 
-d x∧edge_matrix
-⍝x←(~id_matrix nvertices) ∧ edge_matrix ∨ 1000
- x[0;] ⌊ ({(1000 1)[⍵]}edge_matrix[1;])⌊ ({(1000 1)[⍵]}edge_matrix[3;])
+∇ result ← resolve matrix
+  L:
+  matrix←matrix⌊.+⍉matrix
+  ⍎(X∊matrix)/'→L'
+  result ← matrix
+∇
 
+∇ result ← resolve2 matrix;m2
+  m2 ← matrix
+  L:
+  matrix ← m2 
+  m2←matrix⌊.+matrix
+'changes:',+/+/m2≠matrix
+  ⍎(∨/∨/m2≠matrix)/'→L'
+  result ← matrix
+∇
+
+'resolving'
+proximity_matrix ← resolve2 proximity_matrix
+'sum of first column of proximity matrix:'
++/proximity_matrix[;0]
+
+⍝d proximity_matrix
+proximity_matrix[(vertex_index (,'YOU'));]
+
+d (nvertices⍴proximity_matrix[(vertex_index (,'SAN'));] ∧ edge_matrix[(vertex_index (,'SAN'));])/vertices
 
 'Done.'
 
