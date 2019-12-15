@@ -12,6 +12,7 @@ filename ← {⍵[0;]}⊃¯1↑⎕ARG
 'Loading input ', filename
 input ← ⊃GET_LINES filename
 
+⍝ reorders matrix 'm' so that main diagonal contains negative numbers
 ∇ result ← reorder m;n;r;ch;t;tmp
   n ← 0⌷⍴m
 O:
@@ -35,26 +36,30 @@ L:
 result ← m
   
 ∇ 
+
+⍝ applies rules until the state doesn't contain any positive values in non-ORE columns
 ∇ return←resolve args; rules; state; n
   (rules state)←args
-  'resolve, rules:'
-  d rules
   n←⍴state
   ore_index ← get_chemical_index 'ORE' ⍝-ore_index⌽
   ore_mask ← (-ore_index)⌽~(1,((n-1)/0))
-  d ore_index
   L:
-  state ← state + +⌿rules[(state > 0)/⍳n;]
-  ⍎(∨/ore_mask∧(state>0))/'→L' ⍝ continue until there's a positive amount of anything other than ORE (assumed to be in index 0)
+  state ← state + +⌿rules[(state > 0)/⍳n;] ⍝ it's assumed that the rule decreasing value in column N is on row N
+  ⍎(∨/ore_mask∧(state>0))/'→L' ⍝ continue until there's a positive amount of anything other than ORE
+  'Final state:' 
+  d state
+  
   return←ore_index⌷state
 ∇
 
+⍝ create vector of dimension 'n' with zeroes everywhere except 'amount' on 'position'
 ∇ return ← vec args; amount; position; n
   (amount position n) ← args
   return ← n/0
   return[position] ← amount
 ∇
 
+⍝ creates crule vector - input chemicals are positive, target is negative, e.g. 1 A, 2 B => 3 C yields 1 2 ¯3
 ∇ return ← create_rule_vector args; dim; target; recipe
   (args dim) ← args 
   target ← 0⌷1↑args
@@ -62,7 +67,6 @@ result ← m
   return ← -vec (⊃target),dim
   return ← return + ⊃+/{vec ⍵,dim}¨recipe
 ∇
-
 
 ⍝ extracts all occurrences of 'regex' in 'string'
 ∇ return ← extract args
@@ -73,13 +77,13 @@ result ← m
 ⍝ rows - decoded rules (N CHEMICAL)* where the last entry is target
 rows ← {extract '\d+\s+[A-Z]+' input[⍵;]}¨⍳0⌷⍴input
 
-⍝ all_chemicals - all chemicals from 'rows':w
-
+⍝ get list of all unique chemicals from 'rows'
 all_chemicals ← ∪⊃,/{'[A-Z]+'⎕RE ⍵}¨rows
 
 '# of chemicals:', (⍴all_chemicals),':'
 d all_chemicals
 
+⍝ mapping chemical name -> index
 ∇ return ← get_chemical_index chemical
   return←0⌷((⊂,chemical)⍷all_chemicals)/⍳⍴all_chemicals
 ∇
@@ -95,17 +99,17 @@ d all_chemicals
   return ← n c  
 ∇
 
-⍝ now - transform rows to rule recipes
+⍝ transform rows to rule matrix
 n ← 0⌷⍴all_chemicals
 parsed_recipes ← {⌽parse_ingredient¨⍵}¨ rows
-m3 ←n n⍴⊃,/ (n/0), {create_rule_vector ⍵ n}¨ parsed_recipes
+rule_matrix ←n n⍴⊃,/ (n/0), {create_rule_vector ⍵ n}¨ parsed_recipes
+rule_matrix ← reorder rule_matrix ⍝ reorder in order to maintain assumption in 'resolve'
 
+⍝ initial state is having 1 fuel; 'resolve' then works back to the state with only ORE
 fuel_1_state ← n/0
 fuel_1_state[get_chemical_index 'FUEL'] ← 1
 
-m3 ← reorder m3
-
-part1 ← resolve m3 fuel_1_state
+part1 ← resolve rule_matrix fuel_1_state
 'Solution: ', part1
 
 'Done.'
