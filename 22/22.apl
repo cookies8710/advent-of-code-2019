@@ -15,26 +15,35 @@ input ← ⊃GET_LINES filename
 
 ∇ return ← deal_into_new_stack
   return ← ⍬
-  deck ← ⌽deck
+  index ← deck_size - index + 1
 ∇
 
-∇ return ← cut n
+∇ return ← cut n; tmp
   return ← ⍬
-  ⍎(n > 0)/'deck ← (n↓deck), (n↑deck)◊→0'
-  ⍎(n < 0)/'deck ← (n↑deck), (n↓deck)◊→0'
+
+  →(POS NEG)[n < 0]
+  POS:
+  ⍎(index ≥ n)/'index←index-n◊→0'
+  ⍎(index < n)/'index←index+deck_size-n◊→0'
+  →END
+
+  NEG:
+  ⍎(index ≥ deck_size + n)/'index←index-(deck_size + n)◊→0'
+  ⍎(index < deck_size + n)/'index←index-n◊→0'
+  →END
+
+END:
+  index ← tmp
 ∇
 
 ∇ return ← deal_with_increment inc
   return ← ⍬
-  deck[{(0⌷⍴deck)|⍵×inc}¨⍳⍴deck] ← deck
+  index ← deck_size|index×inc 
 ∇
 
-deck ← ⍳deck_size
+index ← 2019
 ⊣{⍎input[⍵;]}¨⍳0⌷⍴ input
-
-'Part 1 answer:'
-(2019⍷deck)/⍳deck_size
-
+'Part 1 answer:', index
 
 'Done.'
 )OFF
