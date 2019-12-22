@@ -20,20 +20,9 @@ input ← ⊃GET_LINES filename
 
 ∇ return ← cut n; tmp
   return ← ⍬
-
-  →(POS NEG)[n < 0]
-  POS:
+  ⍎(n<0)/'n←n+deck_size'
   ⍎(index ≥ n)/'index←index-n◊→0'
   ⍎(index < n)/'index←index+deck_size-n◊→0'
-  →END
-
-  NEG:
-  ⍎(index ≥ deck_size + n)/'index←index-(deck_size + n)◊→0'
-  ⍎(index < deck_size + n)/'index←index-n◊→0'
-  →END
-
-END:
-  index ← tmp
 ∇
 
 ∇ return ← deal_with_increment inc
@@ -41,9 +30,30 @@ END:
   index ← deck_size|index×inc 
 ∇
 
+index ← 2020
+indices ← 2020
+
+∇ main
+  
+  n ← 0
+  hit ← 0
+  L:
+n
+⊣{⍎input[⍵;]}¨⍳0⌷⍴ input
+
+hit ← index ∊ indices
+indices←indices,index
+n←n+1
+  ⍎(~hit)/'→L'
+  n
+∇
+
+⍝main
+
 index ← 2019
 ⊣{⍎input[⍵;]}¨⍳0⌷⍴ input
-'Part 1 answer:', index
+index
+
 
 'Done.'
 )OFF
