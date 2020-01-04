@@ -129,13 +129,10 @@ END:
 DONE:  
 ∇
 
-∇ return ← AMP arg; in; i;out; phases; program
+∇ return ← AMP arg; in; out; phases; program
   (program phases) ← arg
   out ← 0
-  i ← 0
-  L: out ← RUN program out phases[i] 
-  i←i+1
-  ⍎(i<5)/'→L'
+  ⊣{out←RUN program out phases[⍵]}¨⍳5
   return ← out
 ∇
 
