@@ -54,11 +54,14 @@ program ← ⍎raw
 
 ∇ result ← INPUT x; ip; i1; o; program; params; in; out; vtw
   (ip params program in out) ← x
+  ⍎((↑in)≥⍴1⊃in)/'→END' ⍝ block if not enough input values; this is important for part 2
   i1 ← program[ip+1]
   vtw ← 1 (↑in)⊃in  
   in[0] ←1+↑in 
   program[i1] ← vtw 
-  result ← (ip + 2) program in out
+  ip ← ip + 2
+END:
+  result ← ip program in out
 ∇
 
 ∇ result ← OUTPUT x; ip; i1; i2; o; program; params; in; out; oval
@@ -102,13 +105,13 @@ program ← ⍎raw
   result ← ¯1 program in out
 ∇
 
-∇ newip ← STEP args; ip; program; opcode; fn; operation; params
+∇ return ← STEP args; ip; program; opcode; fn; operation; params
   (ip program in out) ← args
   opcode ← ¯2↑'0',⍕program[ip] ⍝ add leading 0 to be sure opcode is at least 2 chars
   fn ← {⍵[0;]}⊃(('01' '02' '03' '04' '05' '06' '07' '08' '99') ≡¨ ⊂opcode) / 'ADD' 'MUL' 'INPUT' 'OUTPUT' 'JT' 'JF' 'LT' 'EQ' 'HALT' ⍝ translate opcode to function 
   params←¯2↓'0000',⍕program[ip]
-  str←⍕fn ip params '('program')' ' ' '('(↑in)'('(1↓in)'))' ' ' (PF out)
-  newip ← ⍎str
+  str←⍕fn ip params '('program')' ' ' '('(↑in)'(,'(1↓in)'))' ' ' (PF out)
+  return ← ⍎str
 ∇
 
 ∇ out ← RUN args; program; input; phase; ip; halt; in; out;tick
@@ -134,6 +137,51 @@ DONE:
   i←i+1
   ⍎(i<5)/'→L'
   return ← out
+∇
+
+∇ return ← AMP2 arg; in; i;out; phases; program
+  ⍝ TODO refactor this
+  (program phases) ← arg
+  A←0 program (0 (phases[0] 0)) ⍬
+  B←0 program (0 (,phases[1])) ⍬
+  C←0 program (0 (,phases[2])) ⍬
+  D←0 program (0 (,phases[3])) ⍬
+  E←0 program (0 (,phases[4])) ⍬
+
+return←⍬
+phases
+TA:
+  ips←A[0]B[0]C[0]D[0]D[0]E[0]
+  ⍎(∧/0>ips)/'→END'⍝ if all programs halted, end
+
+  ⍎(0>↑A)/'→TB'
+  result←STEP A
+  A[0 1 2]←result[0 1 2]
+  (2 1⊃B)←(2 1⊃B),⊃result[3]
+TB:
+  ⍎(0>↑B)/'→TC'
+  result←STEP B
+  B[0 1 2]←result[0 1 2]
+  (2 1⊃C)←(2 1⊃C),⊃result[3]
+TC:
+  ⍎(0>↑C)/'→TD'
+  result←STEP C
+  C[0 1 2]←result[0 1 2]
+  (2 1⊃D)←(2 1⊃D),⊃result[3]
+TD:
+  ⍎(0>↑D)/'→TE'
+  result←STEP D
+  D[0 1 2]←result[0 1 2]
+  (2 1⊃E)←(2 1⊃E),⊃result[3]
+TE:
+  ⍎(0>↑E)/'→TA'
+  result←STEP E
+  E[0 1 2]←result[0 1 2]
+  (2 1⊃A)←(2 1⊃A),⊃result[3]
+  return←return,⊃result[3] ⍝ append E's output to result (if present)
+  →TA
+END:
+  return←↑⌽return ⍝ return only the last of E's results
 ∇
 
 ⍝ returns all permutations of 'vec'
@@ -162,5 +210,8 @@ DONE:
 
 thruster_signals ← ⌽{AMP program ⍵}¨PERMUTATE ⍳5
 'Part 1 (max thruster signal):', ⌈/thruster_signals
+
+thruster_signals ← {AMP2 program ⍵}¨5+PERMUTATE ⍳5
+'Part 2 (max thruster signal):', ⌈/thruster_signals
 'Done.'
 )OFF
