@@ -105,34 +105,29 @@ END:
   result ← ¯1 program in out
 ∇
 
-∇ return ← STEP args; ip; program; opcode; fn; operation; params
+∇ return ← STEP args; ip; program; opcode; fn_name; fn; operation; params
   (ip program in out) ← args
   opcode ← ¯2↑'0',⍕program[ip] ⍝ add leading 0 to be sure opcode is at least 2 chars
-  fn ← {⍵[0;]}⊃(('01' '02' '03' '04' '05' '06' '07' '08' '99') ≡¨ ⊂opcode) / 'ADD' 'MUL' 'INPUT' 'OUTPUT' 'JT' 'JF' 'LT' 'EQ' 'HALT' ⍝ translate opcode to function 
-  params←¯2↓'0000',⍕program[ip]
-  str←⍕fn ip params '('program')' ' ' '('(↑in)'(,'(1↓in)'))' ' ' (PF out)
-  return ← ⍎str
+  fn_name ← {⍵[0;]}⊃(('01' '02' '03' '04' '05' '06' '07' '08' '99') ≡¨ ⊂opcode) / 'ADD' 'MUL' 'INPUT' 'OUTPUT' 'JT' 'JF' 'LT' 'EQ' 'HALT' ⍝ translate opcode to function 
+  params←¯2↓'00',⍕program[ip]
+  ⍎'fn←{',fn_name,' ⍵}'
+  return←fn ip params program in out
 ∇
 
-∇ out ← RUN args; program; input; phase; ip; halt; in; out;tick
+∇ out ← RUN args; program; input; phase; ip; in; out;tick
   (program input phase) ← args
   ip ← 0
-  halt ← 0
-  tick←0
   in ← 0 (phase,input)  
   out ← ⍬
   LOOP:
   (ip program in out) ← STEP ip program in out
-  tick←tick+1
-  halt ← ip < 0
-  →(LOOP DONE)[halt]
-DONE:  
+  →(LOOP 0)[ip < 0]
 ∇
 
 ∇ return ← AMP arg; in; out; phases; program
   (program phases) ← arg
   out ← 0
-  ⊣{out←RUN program out phases[⍵]}¨⍳5
+  ⊣{out←RUN program out ⍵}¨phases
   return ← out
 ∇
 
