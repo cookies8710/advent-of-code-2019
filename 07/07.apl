@@ -14,19 +14,6 @@ raw[('-'⍷raw)/⍳⍴raw]←'¯' ⍝ substitute - for ¯ in order for APL to in
 program ← ⍎raw
 'Program:' program
 
-∇ return ← PF arg
-⍝→(C1 ZERO)[arg≡⍬]
-  →(C1 ZERO)[0=⍴arg]
-  ZERO:return←'⍬'
-  →0
-  C1:→(MULTI ONE)[⍬≡⍴arg]
-  ⍝ONE:return←⍕arg
-  ONE: return←'(,'arg')'
-  →0
-  MULTI:
-  return←'('arg')'
-∇
-
 ∇ result ← GET_PARAMETER x; program; ip; i; params;value
   (program ip i params) ← x
 
