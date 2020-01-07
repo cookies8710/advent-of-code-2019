@@ -4,6 +4,8 @@
 DISPLAY ← {4⎕CR⍵}
 GET_LINES ← {⎕FIO[49]⍵}
 
+DEBUG ← 1 ⍝ in debug mode, tick, IP, next instruction and memory content is shown; input is either just ENTER (1 step) or a number of steps to execute
+
 ⍝ global variables 
 filename ← {⍵[0;]}⊃¯1↑⎕ARG
 
@@ -168,19 +170,41 @@ END:
   fn_name ← {⍵[0;]}⊃(('01' '02' '03' '04' '05' '06' '07' '08' '09' '99') ≡¨ ⊂opcode) / 'ADD' 'MUL' 'INPUT' 'OUTPUT' 'JT' 'JF' 'LT' 'EQ' 'ARB' 'HALT' ⍝ translate opcode to function 
   params←¯2↓'00',⍕program[ip]
   ⍎'fn←{',fn_name,' ⍵}'
+
+
+  ⍎(~DEBUG)/'→NOT_DEBUG'
+  memory_content←2↓memory
+  ⍎(0<≢memory_content)/'memory_content←memory_content[⍋0⊃¨memory_content]'
+  ip fn_name params (4↑ip↓program) '|' (↑memory) memory_content
+  NOT_DEBUG:
+
   return←fn ip params program memory in out
 ∇
 
-∇ out ← RUN args; program; input; ip; in; out
+∇ out ← RUN args; program; input; ip; in; out; tick
   (program memory input) ← args
   ip ← 0
   out ← ⍬
+  tick←0
+  n ← 0
   LOOP:
+
+⍎(~DEBUG)/'→SK'
+tick
+⍝⍎(ip=940)/'n←0'
+⍎(n>0)/'n←n-1◊→SK'
+'Insert cmd'
+  n←⍞
+  ⍎(0<≢n)/'n←⍎n◊→SK'
+  n←0
+SK:
   (ip program memory in out) ← STEP ip program memory (0 (,input)) out
+  tick←tick+1
   →(LOOP 0)[ip < 0]
 ∇
 
 RUN program (0 (¯1 0)) 1
+RUN program (0 (¯1 0)) 2
 
 'Done.'
 )OFF
